@@ -5,41 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>충북 사과 스마트 유통 플랫폼</title>
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Config (스크립트 로드 전 선언) -->
+    <script>
+        window.tailwind = {
+            config: {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['"Noto Sans KR"', 'sans-serif'],
+                        },
+                        colors: {
+                            applegreen: {
+                                50: '#f2fbf5',
+                                100: '#e1f6e8',
+                                500: '#2ca02c',
+                                600: '#248224',
+                                700: '#1b631b',
+                            },
+                            applered: '#d62728',
+                            appleorange: '#ff7f0e',
+                            appleblue: '#1f77b4'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide Icons (안정적인 jsdelivr UMD 빌드 사용) -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Noto Sans KR"', 'sans-serif'],
-                    },
-                    colors: {
-                        applegreen: {
-                            50: '#f2fbf5',
-                            100: '#e1f6e8',
-                            500: '#2ca02c',
-                            600: '#248224',
-                            700: '#1b631b',
-                        },
-                        applered: '#d62728',
-                        appleorange: '#ff7f0e',
-                        appleblue: '#1f77b4'
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body { background-color: #f8fafc; }
         .glass-card {
@@ -485,73 +488,9 @@
     </main>
 
     <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // 생성된 모든 Chart 인스턴스를 보관하여 리사이징 처리에 사용
-        const appCharts = [];
-
-        // -------------------------------------------------------------
-        // Navigation Logic (메뉴 클릭에 따른 화면 전환)
-        // -------------------------------------------------------------
-        const titles = {
-            'dashboard': 'AI 예측 기반 농산물 유통 혁신 대시보드',
-            'timing': '출하 타이밍 예측 상세',
-            'stats': '지역 생산량 통계 및 분석',
-            'b2b': 'B2B 직거래 플랫폼',
-            'weather': '기상 리스크 알림'
-        };
-
-        function showPage(pageId) {
-            // 1. 모든 페이지를 숨기고 타겟 페이지 활성화
-            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            
-            // 2. 헤더 타이틀 변경
-            document.getElementById('header-title').innerText = titles[pageId];
-
-            // 3. 네비게이션 활성화 스타일 변경
-            document.querySelectorAll('.nav-link').forEach(el => {
-                el.classList.remove('bg-applegreen-50', 'text-applegreen-700');
-                el.classList.add('text-slate-600', 'hover:bg-slate-50');
-            });
-            
-            const activeNav = document.getElementById('nav-' + pageId);
-            if(activeNav) {
-                activeNav.classList.remove('text-slate-600', 'hover:bg-slate-50');
-                activeNav.classList.add('bg-applegreen-50', 'text-applegreen-700');
-            }
-
-            // 4. (핵심해결) display:none 상태에서 block으로 바뀐 후, Chart.js 크기가 0이 되는 문제 해결
-            // 화면에 요소가 나타날 시간을 약간 준 후 chart들을 강제로 리사이징 합니다.
-            setTimeout(() => {
-                appCharts.forEach(chart => {
-                    chart.resize();
-                });
-            }, 10);
-
-            // 5. 모바일 화면일 경우, 페이지 이동 시 좌측 메뉴(사이드바) 닫기
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar.classList.contains('-translate-x-full')) {
-                    toggleSidebar();
-                }
-            }
-        }
-
-        // 모바일 사이드바 열고 닫기 로직
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('-translate-x-full');
-            
-            if (sidebar.classList.contains('-translate-x-full')) {
-                overlay.classList.add('hidden');
-            } else {
-                overlay.classList.remove('hidden');
-            }
-        }
+        // 전역 변수 선언
+        let dashPriceChart, dashProdChart, fullPriceChart, fullProdChart;
+        let isChartsInitialized = { dashboard: false, timing: false, stats: false };
 
         // -------------------------------------------------------------
         // Data Extraction & Formatting
@@ -618,35 +557,34 @@
         ];
 
         // -------------------------------------------------------------
-        // Initialize Charts Function
+        // 차트 개별 초기화 함수 (Lazy Loading 용도)
         // -------------------------------------------------------------
-        function initCharts() {
-            // Dashboard Chart 1
-            appCharts.push(new Chart(document.getElementById('dashPriceChart').getContext('2d'), {
+        function initDashboardCharts() {
+            dashPriceChart = new Chart(document.getElementById('dashPriceChart').getContext('2d'), {
                 type: 'line', data: { labels: priceLabels, datasets: priceDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                     plugins: { legend: { display: false }, tooltip: commonTooltip },
                     scales: { x: { display: false }, y: { display: false } }
                 }, plugins: [predictionLinePlugin]
-            }));
+            });
 
-            // Dashboard Chart 2
             const ctxDashProd = document.getElementById('dashProdChart').getContext('2d');
             const grad1 = ctxDashProd.createLinearGradient(0, 0, 0, 200);
             grad1.addColorStop(0, 'rgba(44, 160, 44, 0.2)'); grad1.addColorStop(1, 'rgba(44, 160, 44, 0.0)');
             
-            appCharts.push(new Chart(ctxDashProd, {
+            dashProdChart = new Chart(ctxDashProd, {
                 type: 'line', data: { labels: prodYears, datasets: [{ data: prodData, borderColor: '#2ca02c', backgroundColor: grad1, borderWidth: 3, pointRadius: 4, fill: true, tension: 0.4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false }, tooltip: commonTooltip },
                     scales: { x: { display: false }, y: { display: false } }
                 }
-            }));
+            });
+        }
 
-            // Timing Page Chart
-            appCharts.push(new Chart(document.getElementById('fullPriceChart').getContext('2d'), {
+        function initTimingCharts() {
+            fullPriceChart = new Chart(document.getElementById('fullPriceChart').getContext('2d'), {
                 type: 'line', data: { labels: priceLabels, datasets: priceDatasets },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
@@ -656,14 +594,15 @@
                         y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"}, callback: v => new Intl.NumberFormat('ko-KR').format(v) + '원' } }
                     }
                 }, plugins: [predictionLinePlugin]
-            }));
+            });
+        }
 
-            // Stats Page Chart
+        function initStatsCharts() {
             const ctxFullProd = document.getElementById('fullProdChart').getContext('2d');
             const grad2 = ctxFullProd.createLinearGradient(0, 0, 0, 350);
             grad2.addColorStop(0, 'rgba(44, 160, 44, 0.3)'); grad2.addColorStop(1, 'rgba(44, 160, 44, 0.0)');
             
-            appCharts.push(new Chart(ctxFullProd, {
+            fullProdChart = new Chart(ctxFullProd, {
                 type: 'line', data: { labels: prodYears, datasets: [{ label: '충북 사과 생산량', data: prodData, borderColor: '#2ca02c', backgroundColor: grad2, borderWidth: 4, pointBackgroundColor: '#fff', pointBorderColor: '#2ca02c', pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8, fill: true, tension: 0.4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
@@ -673,13 +612,99 @@
                         y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"}, callback: v => new Intl.NumberFormat('ko-KR').format(v) } }
                     }
                 }
-            }));
+            });
         }
 
-        // DOM 로드 완료 후 실행
-        document.addEventListener('DOMContentLoaded', () => {
-            initCharts();
-            // 기본 대시보드 화면 명시적 로드
+
+        // -------------------------------------------------------------
+        // Navigation Logic (메뉴 클릭에 따른 화면 전환 및 그래프 렌더링)
+        // -------------------------------------------------------------
+        const titles = {
+            'dashboard': 'AI 예측 기반 농산물 유통 혁신 대시보드',
+            'timing': '출하 타이밍 예측 상세',
+            'stats': '지역 생산량 통계 및 분석',
+            'b2b': 'B2B 직거래 플랫폼',
+            'weather': '기상 리스크 알림'
+        };
+
+        function showPage(pageId) {
+            // 1. 모든 페이지를 숨기고 타겟 페이지 활성화
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            // 2. 헤더 타이틀 변경
+            document.getElementById('header-title').innerText = titles[pageId];
+
+            // 3. 네비게이션 활성화 스타일 변경
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-applegreen-50', 'text-applegreen-700');
+                el.classList.add('text-slate-600', 'hover:bg-slate-50');
+            });
+            
+            const activeNav = document.getElementById('nav-' + pageId);
+            if(activeNav) {
+                activeNav.classList.remove('text-slate-600', 'hover:bg-slate-50');
+                activeNav.classList.add('bg-applegreen-50', 'text-applegreen-700');
+            }
+
+            // 4. 차트 지연 생성 (디스플레이 논(None) 이슈 해결)
+            if (pageId === 'dashboard' && !isChartsInitialized.dashboard) {
+                initDashboardCharts();
+                isChartsInitialized.dashboard = true;
+            } else if (pageId === 'timing' && !isChartsInitialized.timing) {
+                initTimingCharts();
+                isChartsInitialized.timing = true;
+            } else if (pageId === 'stats' && !isChartsInitialized.stats) {
+                initStatsCharts();
+                isChartsInitialized.stats = true;
+            }
+
+            // 5. 이미 렌더링된 차트 화면 깨짐 방지용 리사이징
+            setTimeout(() => {
+                if (pageId === 'dashboard') {
+                    if (dashPriceChart) dashPriceChart.resize();
+                    if (dashProdChart) dashProdChart.resize();
+                } else if (pageId === 'timing') {
+                    if (fullPriceChart) fullPriceChart.resize();
+                } else if (pageId === 'stats') {
+                    if (fullProdChart) fullProdChart.resize();
+                }
+            }, 10);
+
+            // 6. 모바일 화면일 경우, 페이지 이동 시 좌측 메뉴(사이드바) 닫기
+            if (window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                if (!sidebar.classList.contains('-translate-x-full')) {
+                    toggleSidebar();
+                }
+            }
+        }
+
+        // 모바일 사이드바 열고 닫기 로직
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        // DOM 로드 및 모든 스크립트 실행이 완료된 후 최초 구동
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                } else {
+                    console.warn("Lucide icons failed to load.");
+                }
+            } catch (e) { console.error("Icon render error:", e); }
+
+            // 기본 대시보드 화면 명시적 로드 (이때 Dashboard 차트가 최초로 그려집니다)
             showPage('dashboard');
         });
 
