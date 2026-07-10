@@ -4,763 +4,585 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>충북 사과 스마트 유통 플랫폼</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS Config (스크립트 로드 전 선언) -->
-    <script>
-        window.tailwind = {
-            config: {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['"Noto Sans KR"', 'sans-serif'],
-                        },
-                        colors: {
-                            applegreen: {
-                                50: '#f2fbf5',
-                                100: '#e1f6e8',
-                                500: '#2ca02c',
-                                600: '#248224',
-                                700: '#1b631b',
-                            },
-                            applered: '#d62728',
-                            appleorange: '#ff7f0e',
-                            appleblue: '#1f77b4'
-                        }
-                    }
-                }
-            }
-        };
-    </script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-
     <style>
-        body { background-color: #f8fafc; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #2c3e50;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.4);
+            --accent-color: #e74c3c;
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --nav-active-bg: #e74c3c;
+            --nav-active-color: #ffffff;
         }
-        .prediction-zone {
-            background: repeating-linear-gradient(
-                45deg,
-                #f8fafc,
-                #f8fafc 10px,
-                #f1f5f9 10px,
-                #f1f5f9 20px
-            );
-        }
-        /* 페이지 전환을 위한 CSS */
-        .page-content { display: none; }
-        .page-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #ef4444;
+            --header-bg: rgba(15, 23, 42, 0.8);
+            --nav-active-bg: #ef4444;
+            --nav-active-color: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255, 99, 132, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(54, 162, 235, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Apple Glassmorphism UI */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            letter-spacing: -1px;
+        }
+
+        .up-trend { color: var(--accent-color); }
+        .down-trend { color: #3b82f6; }
+        
+        .badge-risk {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--header-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-color) !important;
+        }
+        
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            color: var(--accent-color);
+        }
+
+        /* Sub Navigation for Varieties */
+        .sub-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .sub-nav-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .sub-nav-btn:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .sub-nav-btn.active {
+            background: var(--nav-active-bg);
+            color: var(--nav-active-color);
+            border-color: var(--nav-active-bg);
+        }
+
+        /* Page Views */
+        .page-view {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .page-view.active {
+            display: block;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            color: white;
+            border: none;
+        }
+        
+        [data-theme="dark"] .recommendation-card {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .api-status-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
         }
     </style>
 </head>
-<body class="font-sans text-slate-800 antialiased flex h-screen overflow-hidden">
+<body>
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col z-50 shadow-sm fixed md:relative h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0">
-        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200">
-            <div class="flex items-center">
-                <i data-lucide="apple" class="text-applegreen-500 w-6 h-6 mr-2"></i>
-                <span class="font-bold text-lg text-slate-800 tracking-tight">충북 스마트 애플</span>
-            </div>
-            <!-- 모바일용 닫기 버튼 -->
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-slate-800">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
+<!-- Main Navigation -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="fa-solid fa-apple-whole text-danger me-2"></i>충북 사과 스마트 유통 플랫폼
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="theme-toggle" id="themeToggle" role="button" aria-label="다크 모드 전환" tabindex="0">
+                <i class="fa-solid fa-moon"></i>
+            </span>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4">
-            <ul class="space-y-1 px-3">
-                <li>
-                    <a href="javascript:void(0)" onclick="showPage('dashboard')" id="nav-dashboard" class="nav-link flex items-center px-3 py-2.5 bg-applegreen-50 text-applegreen-700 rounded-lg font-medium transition-colors">
-                        <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> AI 대시보드
-                    </a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" onclick="showPage('timing')" id="nav-timing" class="nav-link flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
-                        <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i> 출하 타이밍 예측
-                    </a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" onclick="showPage('stats')" id="nav-stats" class="nav-link flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
-                        <i data-lucide="bar-chart-2" class="w-5 h-5 mr-3"></i> 지역 생산량 통계
-                    </a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" onclick="showPage('b2b')" id="nav-b2b" class="nav-link flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
-                        <i data-lucide="store" class="w-5 h-5 mr-3"></i> B2B 직거래 매칭
-                    </a>
-                </li>
-                <li>
-                    <a href="javascript:void(0)" onclick="showPage('weather')" id="nav-weather" class="nav-link flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
-                        <i data-lucide="cloud-lightning" class="w-5 h-5 mr-3"></i> 기상 리스크 알림
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <div class="p-4 border-t border-slate-200" style="display:none">
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <p class="text-xs font-semibold text-slate-500 mb-1">프리미엄 구독 상태</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-applegreen-600">Pro 플랜 적용중</span>
-                    <i data-lucide="check-circle-2" class="w-4 h-4 text-applegreen-500"></i>
-                </div>
+    </div>
+</nav>
+
+<main class="container-fluid px-4 py-4">
+    
+    <!-- Sub Navigation (SPA Routing Simulation) -->
+    <div class="sub-nav animate__animated animate__fadeInDown">
+        <button class="sub-nav-btn active" data-target="dashboard"><i class="fa-solid fa-chart-pie me-2"></i>종합 대시보드</button>
+        <button class="sub-nav-btn" data-target="variety-hongro"><i class="fa-solid fa-apple-whole me-2" style="color: #ff4757;"></i>홍로 (추석용)</button>
+        <button class="sub-nav-btn" data-target="variety-fuji"><i class="fa-solid fa-apple-whole me-2" style="color: #ff6b81;"></i>부사 (만생종)</button>
+        <button class="sub-nav-btn" data-target="variety-tsugaru"><i class="fa-solid fa-apple-whole me-2" style="color: #7bed9f;"></i>아오리 (조생종)</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: 종합 대시보드 -->
+    <!-- ========================================== -->
+    <div id="dashboard" class="page-view active">
+        <!-- Top Metrics Dashboard -->
+        <section class="row g-4 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <article class="glass-card">
+                    <h2 class="h6 text-muted mb-0 fw-bold">전체 평균 도매가 (10kg)</h2>
+                    <div class="metric-value">98,000원</div>
+                    <small class="text-muted"><i class="fa-solid fa-bolt text-warning me-1"></i>가락시장 실시간 연동</small>
+                </article>
             </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="glass-card">
+                    <h2 class="h6 text-muted mb-0 fw-bold">AI 통합 예측 가격 (다음주)</h2>
+                    <div class="metric-value up-trend">104,500원 <i class="fa-solid fa-arrow-trend-up fa-sm"></i></div>
+                    <small class="up-trend fw-bold">▲ +6.6% 상승 예상</small>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="glass-card recommendation-card shadow-lg">
+                    <h2 class="h6 mb-2 text-white-50 fw-bold">AI 최적 출하시기 추천</h2>
+                    <div class="metric-value mb-1" style="font-size: 1.8rem;"><i class="fa-regular fa-calendar-check me-2"></i>상단 품종을 선택하세요</div>
+                    <small class="fw-bold text-white"><i class="fa-solid fa-magnifying-glass-chart me-1"></i>품종별 맞춤 인사이트 제공</small>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="glass-card">
+                    <h2 class="h6 text-muted mb-3 fw-bold">충북 종합 기상 위험도</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-medium"><i class="fa-solid fa-cloud-showers-heavy text-info me-2"></i>우박 피해</span>
+                        <span class="badge badge-risk bg-success bg-opacity-25 text-success border border-success">안전 (낮음)</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-medium"><i class="fa-solid fa-snowflake text-primary me-2"></i>냉해 피해</span>
+                        <span class="badge badge-risk bg-warning bg-opacity-25 text-warning-emphasis border border-warning">주의 (보통)</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <article class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h5 mb-0 fw-bold"><i class="fa-solid fa-chart-line me-2"></i>전체 도매가격 추이 및 AI 예측</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mainPriceChart"></canvas>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-4">
+                <article class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="h5 mb-0 fw-bold"><i class="fa-solid fa-chart-bar me-2"></i>충북 연도별 생산량</h2>
+                        <span class="badge bg-secondary">KOSIS</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="productionChart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </section>
+        
+        <!-- API Status -->
+        <section class="row g-4 mb-5">
+            <div class="col-12">
+                <article class="glass-card">
+                    <h2 class="h5 mb-4 fw-bold"><i class="fa-solid fa-server me-2"></i>데이터 파이프라인 동기화 상태</h2>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="api-status-box">
+                                <i class="fa-solid fa-cloud-sun fa-2x mb-2 text-info"></i>
+                                <h3 class="h6 fw-bold mb-1">기상청 기상관측 (API)</h3>
+                                <span class="text-success small fw-bold"><i class="fa-solid fa-circle-check me-1"></i>정상 연동 (충주 기온 24.5°C)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="api-status-box">
+                                <i class="fa-solid fa-database fa-2x mb-2 text-primary"></i>
+                                <h3 class="h6 fw-bold mb-1">KOSIS 국가통계 (CSV)</h3>
+                                <span class="text-success small fw-bold"><i class="fa-solid fa-circle-check me-1"></i>2025_num.csv 로드 완료</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="api-status-box">
+                                <i class="fa-solid fa-store fa-2x mb-2 text-warning"></i>
+                                <h3 class="h6 fw-bold mb-1">도매시장 경락가 (CSV/API)</h3>
+                                <span class="text-success small fw-bold"><i class="fa-solid fa-circle-check me-1"></i>2025_date.csv 시계열 동기화</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: 홍로 예측 -->
+    <!-- ========================================== -->
+    <div id="variety-hongro" class="page-view">
+        <div class="d-flex align-items-center mb-4">
+            <h1 class="h3 fw-bold mb-0 text-danger"><i class="fa-solid fa-apple-whole me-2"></i>홍로 (Hongro)</h1>
+            <span class="badge bg-danger ms-3">추석 명절용 특화</span>
         </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full relative overflow-y-auto w-full">
-        <!-- Header -->
-        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
-            <div class="flex items-center">
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-600 hover:text-slate-900 mr-3 flex items-center justify-center">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
-                <h1 id="header-title" class="text-lg md:text-xl font-bold text-slate-800">AI 예측 기반 농산물 유통 혁신 대시보드</h1>
+        
+        <section class="row g-4 mb-4">
+            <div class="col-md-4">
+                <article class="glass-card recommendation-card shadow-lg h-100">
+                    <h2 class="h6 mb-2 text-white-50 fw-bold">AI 최적 출하시기 추천</h2>
+                    <div class="metric-value mb-1"><i class="fa-regular fa-calendar-check me-2"></i>8월 3주차</div>
+                    <hr class="border-light opacity-50">
+                    <div class="mt-3">
+                        <p class="mb-1"><small>예상 최고가 (10kg):</small> <strong class="fs-5">106,000원</strong></p>
+                        <p class="mb-0"><small>수익 극대화 기대치:</small> <strong class="fs-5">▲ +15.2%</strong></p>
+                    </div>
+                </article>
             </div>
-            <div class="flex items-center space-x-4">
-                <button class="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-applered rounded-full"></span>
-                </button>
-                <div class="w-8 h-8 rounded-full bg-applegreen-100 border border-applegreen-200 flex items-center justify-center text-applegreen-700 font-bold text-sm">
-                    여
-                </div>
+            <div class="col-md-8">
+                <article class="glass-card h-100">
+                    <h2 class="h5 mb-4 fw-bold"><i class="fa-solid fa-chart-line me-2"></i>홍로 가격 시계열 예측 (향후 4주)</h2>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="hongroChart"></canvas>
+                    </div>
+                </article>
             </div>
-        </header>
+        </section>
 
-        <!-- PAGE 1: Dashboard -->
-        <div id="page-dashboard" class="page-content active p-4 md:p-6 space-y-6">
-            <!-- Alert Banner -->
-            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg flex items-start shadow-sm">
-                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0"></i>
-                <div>
-                    <h3 class="text-sm font-bold text-amber-800">사전 작황 리스크 경보 (긴급)</h3>
-                    <p class="text-sm text-amber-700 mt-1">다음 주 충북 북부 지역(충주, 제천)에 우박 및 급격한 기온 강하가 예보되었습니다. 수확기 사과의 피해 최소화를 위해 조기 출하를 검토하시기 바랍니다.</p>
-                </div>
+        <section class="row g-4 mb-5">
+            <div class="col-12">
+                <article class="glass-card">
+                    <h2 class="h5 mb-3 fw-bold"><i class="fa-solid fa-lightbulb text-warning me-2"></i>AI 분석 인사이트</h2>
+                    <p class="mb-0 lh-lg">올해 추석(9월 중순)을 앞두고 제수용 과일 수요가 급증할 것으로 예측됩니다. 기상청 데이터를 연동한 결과, 8월 4주차에 비가 잦을 것으로 예상되어 일조량 감소 전인 <strong>8월 3주차에 조기 출하하는 것</strong>이 당도 유지와 높은 경락가를 보장받는 최적의 시나리오입니다.</p>
+                </article>
             </div>
+        </section>
+    </div>
 
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <!-- Card 1 -->
-                <div class="glass-card rounded-xl p-5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-slate-500">현재 홍로 평균가 (10kg/상)</h3>
-                        <div class="p-2 bg-blue-50 rounded-lg text-appleblue"><i data-lucide="coins" class="w-4 h-4"></i></div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-black text-slate-800">36,000<span class="text-base font-normal text-slate-500 ml-1">원</span></div>
-                        <div class="text-sm text-emerald-500 flex items-center mt-2 font-medium">
-                            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> 전주 대비 7.1% 반등
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="glass-card rounded-xl p-5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-slate-500">AI 예측: 차주 최고가 품종</h3>
-                        <div class="p-2 bg-red-50 rounded-lg text-applered"><i data-lucide="target" class="w-4 h-4"></i></div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-black text-slate-800">아리수 <span class="text-sm font-semibold text-applered ml-2 bg-red-50 px-2 py-1 rounded">추천</span></div>
-                        <div class="text-sm text-slate-500 mt-2">예상 도매가: <span class="font-bold text-slate-700">45,000원대</span> 유지 전망</div>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="glass-card rounded-xl p-5 flex flex-col justify-between border-2 border-applegreen-500 shadow-lg shadow-applegreen-100">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-bold text-applegreen-700">스마트 출하 타이밍 알림</h3>
-                        <div class="p-2 bg-applegreen-100 rounded-lg text-applegreen-600 animate-pulse"><i data-lucide="bell-ring" class="w-4 h-4"></i></div>
-                    </div>
-                    <div>
-                        <div class="text-lg font-bold text-slate-800 leading-tight">홍로 품종, 지금이 최적기!</div>
-                        <div class="text-sm text-slate-600 mt-2">AI 분석 결과, 향후 2주간 시장 물량 증가로 인한 가격 하락(-15%)이 예측됩니다.</div>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="glass-card rounded-xl p-5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-semibold text-slate-500">올해 충북 예상 생산량</h3>
-                        <div class="p-2 bg-orange-50 rounded-lg text-orange-500"><i data-lucide="box" class="w-4 h-4"></i></div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-black text-slate-800">44,318<span class="text-base font-normal text-slate-500 ml-1">톤</span></div>
-                        <div class="text-sm text-emerald-500 flex items-center mt-2 font-medium">
-                            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> 전년 대비 3.7% 증가
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Section (Dashboard Preview) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                <!-- Dashboard Chart 1: Price Preview -->
-                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col cursor-pointer hover:shadow-md transition-shadow" onclick="showPage('timing')">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-800">도매가격 예측 요약 <span class="text-xs text-applegreen-600 font-normal ml-2">더 보기 &rarr;</span></h2>
-                        </div>
-                    </div>
-                    <div class="flex-1 relative w-full" style="min-height: 250px;">
-                        <canvas id="dashPriceChart"></canvas>
-                        <div class="absolute top-0 right-0 h-full w-[20%] prediction-zone opacity-30 pointer-events-none border-l-2 border-dashed border-applegreen-500"></div>
-                    </div>
-                </div>
-
-                <!-- Dashboard Chart 2: Production Preview -->
-                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col cursor-pointer hover:shadow-md transition-shadow" onclick="showPage('stats')">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-800">지역 생산량 동향 <span class="text-xs text-applegreen-600 font-normal ml-2">더 보기 &rarr;</span></h2>
-                        </div>
-                    </div>
-                    <div class="flex-1 relative w-full" style="min-height: 250px;">
-                        <canvas id="dashProdChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <footer class="py-6 text-center text-xs md:text-sm text-slate-400 border-t border-slate-200 mt-6">
-                &copy; 2026 충청북도 공공데이터·AI 활용 창업경진대회 출품작 - 스마트 사과 유통 플랫폼 프로토타입
-            </footer>
+    <!-- ========================================== -->
+    <!-- VIEW 3: 부사 예측 -->
+    <!-- ========================================== -->
+    <div id="variety-fuji" class="page-view">
+        <div class="d-flex align-items-center mb-4">
+            <h1 class="h3 fw-bold mb-0 text-danger" style="color: #ff6b81 !important;"><i class="fa-solid fa-apple-whole me-2"></i>부사 (Fuji)</h1>
+            <span class="badge bg-secondary ms-3">저장성 우수 만생종</span>
         </div>
+        
+        <section class="row g-4 mb-4">
+            <div class="col-md-4">
+                <article class="glass-card recommendation-card shadow-lg h-100" style="background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);">
+                    <h2 class="h6 mb-2 text-white-50 fw-bold">AI 최적 출하시기 추천</h2>
+                    <div class="metric-value mb-1"><i class="fa-regular fa-calendar-check me-2"></i>11월 1주차</div>
+                    <hr class="border-light opacity-50">
+                    <div class="mt-3">
+                        <p class="mb-1"><small>예상 최고가 (10kg):</small> <strong class="fs-5">92,000원</strong></p>
+                        <p class="mb-0"><small>냉해 리스크 회피 수익:</small> <strong class="fs-5">▲ +8.5%</strong></p>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-8">
+                <article class="glass-card h-100">
+                    <h2 class="h5 mb-4 fw-bold"><i class="fa-solid fa-chart-line me-2"></i>부사 가격 시계열 예측 (가을 시즌)</h2>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="fujiChart"></canvas>
+                    </div>
+                </article>
+            </div>
+        </section>
 
-        <!-- PAGE 2: Timing Prediction -->
-        <div id="page-timing" class="page-content p-4 md:p-6 space-y-6 bg-white min-h-full">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-slate-100 pb-4 gap-4">
-                <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-slate-800">품종별 도매가격 및 AI 출하 예측</h2>
-                    <p class="text-slate-500 mt-1 text-sm md:text-base">하이브리드 AI 모델의 4주 예측 신뢰 지수(Confidence Index) 기반</p>
-                </div>
-                <div class="bg-applegreen-50 px-4 py-2 rounded-lg border border-applegreen-100 text-sm whitespace-nowrap">
-                    예측 신뢰도 <strong class="text-applegreen-700 text-lg">86%</strong>
-                </div>
+        <section class="row g-4 mb-5">
+            <div class="col-12">
+                <article class="glass-card">
+                    <h2 class="h5 mb-3 fw-bold"><i class="fa-solid fa-lightbulb text-warning me-2"></i>AI 분석 인사이트</h2>
+                    <p class="mb-0 lh-lg">부사는 저장성이 강해 장기 유통이 가능하지만, 11월 2주차부터 충북 산간지역에 이른 서리와 냉해가 예측되었습니다. (2025_date.csv 과거 패턴 분석) 따라서 손실률을 최소화하기 위해 <strong>냉해 발생 직전인 11월 1주차에 전량 수확 후 저온저장고 입고 및 순차 출하</strong>를 권장합니다.</p>
+                </article>
             </div>
-            
-            <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col shadow-sm border border-slate-200">
-                <div class="flex flex-col lg:flex-row justify-between items-start mb-4 gap-4">
-                    <div class="flex items-center space-x-2 md:space-x-4 overflow-x-auto w-full pb-2 md:pb-0">
-                        <button onclick="filterVariety('all', this)" class="variety-btn px-3 py-1 bg-slate-800 text-white rounded text-sm font-medium whitespace-nowrap">전체 품종</button>
-                        <button onclick="filterVariety('hongro', this)" class="variety-btn px-3 py-1 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded text-sm font-medium transition-colors whitespace-nowrap">홍로</button>
-                        <button onclick="filterVariety('arisu', this)" class="variety-btn px-3 py-1 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded text-sm font-medium transition-colors whitespace-nowrap">아리수</button>
-                        <button onclick="filterVariety('summerking', this)" class="variety-btn px-3 py-1 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded text-sm font-medium transition-colors whitespace-nowrap">썸머킹</button>
-                    </div>
-                    <div class="flex items-center space-x-3 text-xs md:text-sm whitespace-nowrap">
-                        <span class="flex items-center text-slate-600"><span class="w-3 h-3 rounded-full bg-appleblue mr-1.5"></span>홍로</span>
-                        <span class="flex items-center text-slate-600"><span class="w-3 h-3 rounded-full bg-applered mr-1.5"></span>아리수</span>
-                        <span class="flex items-center text-slate-600"><span class="w-3 h-3 rounded-full bg-appleorange mr-1.5"></span>썸머킹</span>
-                    </div>
-                </div>
-                <div class="flex-1 relative w-full mt-4" style="min-height: 350px;">
-                    <canvas id="fullPriceChart"></canvas>
-                    <div class="absolute top-0 right-0 h-full w-[20%] prediction-zone opacity-30 pointer-events-none border-l-2 border-dashed border-applegreen-500"></div>
-                    <div class="absolute top-2 right-[2%] text-xs md:text-sm font-bold text-applegreen-700 bg-white/90 px-2 md:px-3 py-1 rounded shadow pointer-events-none flex items-center">
-                        <i data-lucide="sparkles" class="w-4 h-4 mr-1"></i> AI 예측 구간
-                    </div>
-                </div>
-                
-                <div class="mt-6 bg-slate-50 p-4 rounded-lg border border-slate-200 transition-all">
-                    <h4 class="font-bold text-slate-800 mb-2 flex items-center">
-                        <i data-lucide="info" class="w-4 h-4 mr-2 text-appleblue"></i> AI 인사이트 
-                        <span id="insight-badge" class="ml-2 bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded">전체 품종</span>
-                    </h4>
-                    <ul id="insight-list" class="list-disc list-inside text-sm text-slate-600 space-y-2 mt-2 transition-opacity duration-300">
-                        <!-- Default insight text -->
-                        <li><strong>전반적 시장:</strong> 연말까지 시장 내 사과 공급량이 점진적으로 증가하며 가격 하향 안정화가 예상됩니다.</li>
-                        <li><strong>홍로:</strong> 명절 특수 종료 및 공급 물량 증가로 인해 당분간 지속적인 하락세가 예상됩니다.</li>
-                        <li><strong>아리수:</strong> 시장 내 프리미엄 수요가 유지되며 향후 2주간 강보합세(45,000원~46,000원대)를 보일 전망입니다.</li>
-                        <li><strong>썸머킹:</strong> 조생종 특성상 수확 시기가 지나 시장 거래가 종료되었으며, 재고 물량은 가공용으로 소진을 권장합니다.</li>
-                    </ul>
-                </div>
-            </div>
+        </section>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: 아오리 예측 -->
+    <!-- ========================================== -->
+    <div id="variety-tsugaru" class="page-view">
+        <div class="d-flex align-items-center mb-4">
+            <h1 class="h3 fw-bold mb-0 text-success"><i class="fa-solid fa-apple-whole me-2"></i>아오리 (Tsugaru)</h1>
+            <span class="badge bg-success ms-3">여름 조생종</span>
         </div>
-
-        <!-- PAGE 3: Regional Stats -->
-        <div id="page-stats" class="page-content p-4 md:p-6 space-y-6 bg-white min-h-full">
-            <div class="border-b border-slate-100 pb-4 mb-6">
-                <h2 class="text-xl md:text-2xl font-bold text-slate-800">충북 지역 사과 생산량 통계</h2>
-                <p class="text-slate-500 mt-1 text-sm md:text-base">기상 변수에 따른 연도별 작황 추이 및 분석</p>
+        
+        <section class="row g-4 mb-4">
+            <div class="col-md-4">
+                <article class="glass-card recommendation-card shadow-lg h-100" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <h2 class="h6 mb-2 text-white-50 fw-bold">AI 최적 출하시기 추천</h2>
+                    <div class="metric-value mb-1"><i class="fa-regular fa-calendar-check me-2"></i>7월 4주차</div>
+                    <hr class="border-light opacity-50">
+                    <div class="mt-3">
+                        <p class="mb-1"><small>예상 최고가 (10kg):</small> <strong class="fs-5">88,000원</strong></p>
+                        <p class="mb-0"><small>시장 선점 프리미엄:</small> <strong class="fs-5">▲ +12.0%</strong></p>
+                    </div>
+                </article>
             </div>
-            
-            <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col shadow-sm border border-slate-200">
-                <div class="flex-1 relative w-full" style="min-height: 350px;">
-                    <canvas id="fullProdChart"></canvas>
-                </div>
-                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-red-50 p-4 rounded-lg border border-red-100">
-                        <h4 class="font-bold text-red-800 text-sm mb-1">2023년 생산량 급감</h4>
-                        <p class="text-xs text-red-700">봄철 이상 저온(냉해) 및 여름철 집중 호우로 인해 생산량이 전년 대비 <strong>38% 감소</strong>(36,063톤)하는 심각한 피해 발생.</p>
+            <div class="col-md-8">
+                <article class="glass-card h-100">
+                    <h2 class="h5 mb-4 fw-bold"><i class="fa-solid fa-chart-line me-2"></i>아오리 가격 시계열 예측 (여름 시즌)</h2>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="tsugaruChart"></canvas>
                     </div>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <h4 class="font-bold text-blue-800 text-sm mb-1">2024년 회복세</h4>
-                        <p class="text-xs text-blue-700">기상 조건 호전 및 방제 노력으로 전년 대비 생산량이 일부 회복(42,735톤)되었으나, 평년 수준에는 미치지 못함.</p>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                        <h4 class="font-bold text-green-800 text-sm mb-1">2025년 전망</h4>
-                        <p class="text-xs text-green-700">추정치 44,318톤으로 완만한 증가세이나, 국지성 우박 등 변동성 요인이 상존하여 <strong>지속적인 AI 모니터링이 필수적</strong>임.</p>
-                    </div>
-                </div>
+                </article>
             </div>
-        </div>
+        </section>
 
-        <!-- PAGE 4: B2B Matching -->
-        <div id="page-b2b" class="page-content p-4 md:p-6 space-y-6 bg-white min-h-full">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-100 pb-4 mb-6 gap-4">
-                <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-slate-800">지역 소상공인 직거래 매칭 (B2B)</h2>
-                    <p class="text-slate-500 mt-1 text-sm md:text-base">수수료 없는 농가-지역 매장 다이렉트 거래망</p>
-                </div>
-                <button class="bg-applegreen-500 hover:bg-applegreen-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center whitespace-nowrap">
-                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i> 새 납품 제안하기
-                </button>
+        <section class="row g-4 mb-5">
+            <div class="col-12">
+                <article class="glass-card">
+                    <h2 class="h5 mb-3 fw-bold"><i class="fa-solid fa-lightbulb text-warning me-2"></i>AI 분석 인사이트</h2>
+                    <p class="mb-0 lh-lg">아오리는 여름철 첫 출하되는 사과로 초기 시장 선점 효과가 가격을 결정합니다. 올해는 폭염 일수가 길어질 것으로 KOSIS 기후 데이터가 시사하고 있습니다. 과육이 물러지기 전인 <strong>7월 4주차에 발빠르게 출하하여 초기 프리미엄 가격</strong>을 확보하는 전략이 가장 유리합니다.</p>
+                </article>
             </div>
-            
-            <!-- Filters -->
-            <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
-                <select class="border border-slate-300 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:border-applegreen-500">
-                    <option>모든 품종</option>
-                    <option>홍로</option>
-                    <option>아리수</option>
-                    <option>썸머킹</option>
-                    <option>기타/무관</option>
-                </select>
-                <select class="border border-slate-300 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:border-applegreen-500">
-                    <option>모든 지역</option>
-                    <option>청주시</option>
-                    <option>충주시</option>
-                    <option>제천시</option>
-                    <option>보은군</option>
-                </select>
-            </div>
+        </section>
+    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Match Request 1 -->
-                <div class="border border-slate-200 rounded-lg p-5 hover:border-applegreen-500 hover:shadow-md transition-all bg-white cursor-pointer group flex flex-col justify-between h-48">
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">홍로 (보통~하)</span>
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">매칭 대기중</span>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-lg mb-1 group-hover:text-applegreen-600 transition-colors">청주 상당구 '프레시 디저트 카페'</h4>
-                        <p class="text-sm text-slate-500 line-clamp-2">제과용 사과 주 20kg 정기 납품 희망합니다. 모양은 안 예뻐도 당도 높고 아삭한 흠집 사과 대환영입니다.</p>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-slate-400">AI 적정 희망가</span>
-                            <span class="text-base font-bold text-slate-800">25,000원 <span class="text-xs font-normal text-slate-500">/ 10kg</span></span>
-                        </div>
-                        <button class="text-sm font-semibold text-applegreen-600 bg-applegreen-50 px-3 py-1.5 rounded hover:bg-applegreen-100">제안하기</button>
-                    </div>
-                </div>
-                
-                <!-- Match Request 2 -->
-                <div class="border border-slate-200 rounded-lg p-5 hover:border-applegreen-500 hover:shadow-md transition-all bg-white cursor-pointer group flex flex-col justify-between h-48">
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded">아리수 (상~특)</span>
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">긴급 구인</span>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-lg mb-1 group-hover:text-applegreen-600 transition-colors">충주 로컬푸드 직매장</h4>
-                        <p class="text-sm text-slate-500 line-clamp-2">명절 선물용 고품질 아리수 50박스 긴급 수배합니다. 당일 납품 가능하신 농가 우대.</p>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-slate-400">희망 매입가</span>
-                            <span class="text-base font-bold text-applered">55,000원 <span class="text-xs font-normal text-slate-500">/ 10kg</span></span>
-                        </div>
-                        <button class="text-sm font-semibold text-applegreen-600 bg-applegreen-50 px-3 py-1.5 rounded hover:bg-applegreen-100">제안하기</button>
-                    </div>
-                </div>
+</main>
 
-                <!-- Match Request 3 -->
-                <div class="border border-slate-200 rounded-lg p-5 hover:border-applegreen-500 hover:shadow-md transition-all bg-white cursor-pointer group flex flex-col justify-between h-48">
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded">품종 무관 (하/파지)</span>
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">상시 모집</span>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-lg mb-1 group-hover:text-applegreen-600 transition-colors">진천 사과즙 가공 공장</h4>
-                        <p class="text-sm text-slate-500 line-clamp-2">가공용 낙과 및 파지 사과 톤 단위로 대량 수매합니다. 직접 수거 가능합니다.</p>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-slate-400">매입 단가</span>
-                            <span class="text-base font-bold text-slate-700">수량별 협의</span>
-                        </div>
-                        <button class="text-sm font-semibold text-slate-600 border border-slate-300 px-3 py-1.5 rounded hover:bg-slate-50">연락하기</button>
-                    </div>
-                </div>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-                 <!-- Match Request 4 -->
-                 <div class="border border-slate-200 rounded-lg p-5 opacity-70 bg-slate-50 flex flex-col justify-between h-48">
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1 rounded">썸머킹 (보통)</span>
-                            <span class="text-xs text-emerald-600 font-bold bg-emerald-100 px-2 py-0.5 rounded">매칭 완료</span>
-                        </div>
-                        <h4 class="font-bold text-slate-600 text-lg mb-1">제천 어린이집 급식센터</h4>
-                        <p class="text-sm text-slate-400 line-clamp-2">식단용 미니 사과 또는 썸머킹 납품처 찾습니다. (월 2회 정기)</p>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-slate-200 pt-3 mt-3">
-                        <span class="text-sm text-slate-400"><i data-lucide="check" class="w-4 h-4 inline mr-1"></i>제천 '푸른농원'과 매칭 완료</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+<script>
+    /* ==============================
+       SPA Routing (Tab Navigation)
+       ============================== */
+    const navButtons = document.querySelectorAll('.sub-nav-btn');
+    const pageViews = document.querySelectorAll('.page-view');
 
-        <!-- PAGE 5: Weather Risk -->
-        <div id="page-weather" class="page-content p-4 md:p-6 space-y-6 bg-white min-h-full">
-            <div class="border-b border-slate-100 pb-4 mb-6">
-                <h2 class="text-xl md:text-2xl font-bold text-slate-800">사전 기상 리스크 알림</h2>
-                <p class="text-slate-500 mt-1 text-sm md:text-base">공공 기상 데이터를 활용한 충북 지역 과수원 맞춤형 재해 예보</p>
-            </div>
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 버튼 활성화 토글
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-            <div class="bg-white border border-red-200 rounded-xl p-4 md:p-6 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-red-100 rounded-bl-full -mr-4 -mt-4 opacity-50"></div>
-                <div class="flex flex-col md:flex-row items-start">
-                    <div class="bg-red-100 p-3 rounded-full mb-4 md:mb-0 md:mr-4 z-10">
-                        <i data-lucide="cloud-hail" class="w-8 h-8 text-red-600"></i>
-                    </div>
-                    <div class="z-10">
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">긴급 주의보</span>
-                            <span class="text-sm text-slate-500">발생 예정: 2026. 08. 12 (수) 오후</span>
-                        </div>
-                        <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-2">충북 북부(충주, 제천, 단양) 국지성 우박 예보</h3>
-                        <p class="text-sm md:text-base text-slate-600 mb-4">대기 불안정으로 인해 12일 오후부터 저녁 사이 해당 지역에 지름 1~2cm 내외의 우박이 떨어질 가능성이 높습니다. 수확을 앞둔 조생종 사과의 타박상 피해가 우려됩니다.</p>
-                        
-                        <h4 class="font-semibold text-slate-800 mb-2 text-sm border-t border-red-100 pt-3">AI 대응 권고:</h4>
-                        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1 ml-1">
-                            <li>방조망 및 우박망 사전 점검 및 전개</li>
-                            <li>수확 가능한 썸머킹, 아리수 등 조생종 <strong>즉시 조기 수확 권장</strong></li>
-                            <li>피해 발생 시 B2B 매칭 게시판을 통해 가공용 파지 사과 신속 처분 준비</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <h3 class="text-lg font-bold text-slate-800 mt-8 mb-4">주간 과수원 특화 기상</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <div class="border border-slate-200 rounded-lg p-3 md:p-4 text-center bg-slate-50">
-                    <p class="text-sm font-bold text-slate-500 mb-2">오늘 (월)</p>
-                    <i data-lucide="sun" class="w-8 h-8 text-amber-500 mx-auto mb-2"></i>
-                    <p class="font-bold text-lg text-slate-800">32° / 22°</p>
-                    <p class="text-xs text-slate-500 mt-1">방제 최적일</p>
-                </div>
-                <div class="border border-slate-200 rounded-lg p-3 md:p-4 text-center bg-slate-50">
-                    <p class="text-sm font-bold text-slate-500 mb-2">내일 (화)</p>
-                    <i data-lucide="cloud-sun" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
-                    <p class="font-bold text-lg text-slate-800">30° / 23°</p>
-                    <p class="text-xs text-slate-500 mt-1">무난함</p>
-                </div>
-                <div class="border border-red-200 rounded-lg p-3 md:p-4 text-center bg-red-50 relative">
-                    <div class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                    <p class="text-sm font-bold text-red-600 mb-2">모레 (수)</p>
-                    <i data-lucide="cloud-hail" class="w-8 h-8 text-red-500 mx-auto mb-2"></i>
-                    <p class="font-bold text-lg text-slate-800">28° / 21°</p>
-                    <p class="text-xs font-bold text-red-600 mt-1">우박 주의</p>
-                </div>
-                <div class="border border-slate-200 rounded-lg p-3 md:p-4 text-center bg-slate-50">
-                    <p class="text-sm font-bold text-slate-500 mb-2">목요일</p>
-                    <i data-lucide="cloud-rain" class="w-8 h-8 text-blue-400 mx-auto mb-2"></i>
-                    <p class="font-bold text-lg text-slate-800">26° / 20°</p>
-                    <p class="text-xs text-slate-500 mt-1">약한 비</p>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <script>
-        // Initialize Lucide Icons
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
+            // 뷰 전환
+            const targetId = btn.getAttribute('data-target');
+            pageViews.forEach(view => {
+                view.classList.remove('active');
+                if(view.id === targetId) {
+                    view.classList.add('active');
+                }
+            });
         });
+    });
 
-        // 전역 차트 객체 배열 (리사이징 관리용)
-        const appCharts = [];
-        let fullPriceChartInstance = null; // 품종 필터링을 위한 전역 변수
+    /* ==============================
+       Dark Mode Toggle
+       ============================== */
+    const themeToggle = document.getElementById('themeToggle');
+    const rootElement = document.documentElement;
+    const icon = themeToggle.querySelector('i');
+    
+    // 차트 옵션 업데이트용 전역 변수
+    let charts = [];
 
-        // -------------------------------------------------------------
-        // Data Extraction & Formatting
-        // -------------------------------------------------------------
-        const prodYears = ['2020', '2021', '2022', '2023', '2024', '2025'];
-        const prodData = [42477, 52133, 58640, 36063, 42735, 44318];
-
-        const priceLabels = [
-            '07-05', '07-15', '08-01', '08-15', '09-01', '09-15', '10-01', '10-15', '10-31', 
-            '11-07', '11-14'
-        ];
-
-        const summerData = [61818, 55000, 45000, 45327, null, null, null, null, null, null, null];
-        const hongroData = [null, null, 98690, 85000, 70000, 55000, 45000, 35000, 33625, 31000, 28000];
-        const arisuData  = [null, null, null, 54125, 52000, 50000, 48000, 45000, 43808, 45000, 46000];
-
-        // Chart Plugins & Common Settings
-        const predictionLinePlugin = {
-            id: 'predictionLine',
-            beforeDraw: chart => {
-                if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
-                    const ctx = chart.ctx;
-                    ctx.save();
-                    const activePoint = chart.tooltip._active[0];
-                    ctx.beginPath();
-                    ctx.setLineDash([5, 5]);
-                    ctx.moveTo(activePoint.element.x, chart.chartArea.top);
-                    ctx.lineTo(activePoint.element.x, chart.chartArea.bottom);
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-        };
-
-        const commonTooltip = {
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            titleColor: '#1e293b',
-            bodyColor: '#334155',
-            borderColor: '#e2e8f0',
-            borderWidth: 1,
-            padding: 12,
-            boxPadding: 4,
-            usePointStyle: true,
-            callbacks: {
-                label: function(context) {
-                    let label = context.dataset.label || '';
-                    if (label) label += ': ';
-                    if (context.parsed.y !== null) {
-                        label += new Intl.NumberFormat('ko-KR').format(context.parsed.y) + (context.chart.canvas.id.includes('Prod') ? '톤' : '원');
-                    }
-                    return label;
-                }
-            }
-        };
-
-        const priceDatasets = [
-            { label: '홍로', data: hongroData.map((v, i) => i <= 8 ? v : null), borderColor: '#1f77b4', backgroundColor: '#1f77b4', borderWidth: 3, pointRadius: 3, tension: 0.3, spanGaps: true },
-            { label: '홍로(예측)', data: hongroData.map((v, i) => i >= 8 ? v : (i===8?hongroData[8]:null)), borderColor: '#1f77b4', borderWidth: 3, borderDash: [5,5], pointBackgroundColor: '#fff', pointRadius: 3, tension: 0.3, spanGaps: true },
-            { label: '아리수', data: arisuData.map((v, i) => i <= 8 ? v : null), borderColor: '#d62728', backgroundColor: '#d62728', borderWidth: 3, pointRadius: 3, tension: 0.3, spanGaps: true },
-            { label: '아리수(예측)', data: arisuData.map((v, i) => i >= 8 ? v : (i===8?arisuData[8]:null)), borderColor: '#d62728', borderWidth: 3, borderDash: [5,5], pointBackgroundColor: '#fff', pointRadius: 3, tension: 0.3, spanGaps: true },
-            { label: '썸머킹', data: summerData, borderColor: '#ff7f0e', backgroundColor: '#ff7f0e', borderWidth: 3, pointRadius: 3, tension: 0.3, spanGaps: true }
-        ];
-
-        // -------------------------------------------------------------
-        // Initialize All Charts at Once
-        // -------------------------------------------------------------
-        function initCharts() {
-            // Dashboard Chart 1
-            const dashPriceCtx = document.getElementById('dashPriceChart').getContext('2d');
-            appCharts.push(new Chart(dashPriceCtx, {
-                type: 'line', data: { labels: priceLabels, datasets: priceDatasets },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: false }, tooltip: commonTooltip },
-                    scales: { x: { display: false }, y: { display: false } }
-                }, plugins: [predictionLinePlugin]
-            }));
-
-            // Dashboard Chart 2
-            const ctxDashProd = document.getElementById('dashProdChart').getContext('2d');
-            const grad1 = ctxDashProd.createLinearGradient(0, 0, 0, 200);
-            grad1.addColorStop(0, 'rgba(44, 160, 44, 0.2)'); grad1.addColorStop(1, 'rgba(44, 160, 44, 0.0)');
-            appCharts.push(new Chart(ctxDashProd, {
-                type: 'line', data: { labels: prodYears, datasets: [{ data: prodData, borderColor: '#2ca02c', backgroundColor: grad1, borderWidth: 3, pointRadius: 4, fill: true, tension: 0.4 }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: commonTooltip },
-                    scales: { x: { display: false }, y: { display: false } }
-                }
-            }));
-
-            // Timing Page Chart
-            const fullPriceCtx = document.getElementById('fullPriceChart').getContext('2d');
-            fullPriceChartInstance = new Chart(fullPriceCtx, {
-                type: 'line', data: { labels: priceLabels, datasets: priceDatasets },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: false }, tooltip: commonTooltip },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"} } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"}, callback: v => new Intl.NumberFormat('ko-KR').format(v) + '원' } }
-                    }
-                }, plugins: [predictionLinePlugin]
-            });
-            appCharts.push(fullPriceChartInstance);
-
-            // Stats Page Chart
-            const ctxFullProd = document.getElementById('fullProdChart').getContext('2d');
-            const grad2 = ctxFullProd.createLinearGradient(0, 0, 0, 350);
-            grad2.addColorStop(0, 'rgba(44, 160, 44, 0.3)'); grad2.addColorStop(1, 'rgba(44, 160, 44, 0.0)');
-            appCharts.push(new Chart(ctxFullProd, {
-                type: 'line', data: { labels: prodYears, datasets: [{ label: '충북 사과 생산량', data: prodData, borderColor: '#2ca02c', backgroundColor: grad2, borderWidth: 4, pointBackgroundColor: '#fff', pointBorderColor: '#2ca02c', pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8, fill: true, tension: 0.4 }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: commonTooltip },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"} } },
-                        y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: "'Noto Sans KR', sans-serif"}, callback: v => new Intl.NumberFormat('ko-KR').format(v) } }
-                    }
-                }
-            }));
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = rootElement.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+            rootElement.removeAttribute('data-theme');
+            icon.className = 'fa-solid fa-moon';
+            Chart.defaults.color = '#7f8c8d';
+            updateChartsGridColor('rgba(0, 0, 0, 0.1)');
+        } else {
+            rootElement.setAttribute('data-theme', 'dark');
+            icon.className = 'fa-solid fa-sun text-warning';
+            Chart.defaults.color = '#94a3b8';
+            updateChartsGridColor('rgba(255, 255, 255, 0.1)');
         }
+    });
 
-        // -------------------------------------------------------------
-        // Navigation Logic (메뉴 클릭에 따른 화면 전환 및 그래프 리사이징)
-        // -------------------------------------------------------------
-        const titles = {
-            'dashboard': 'AI 예측 기반 농산물 유통 혁신 대시보드',
-            'timing': '출하 타이밍 예측 상세',
-            'stats': '지역 생산량 통계 및 분석',
-            'b2b': 'B2B 직거래 플랫폼',
-            'weather': '기상 리스크 알림'
-        };
-
-        function showPage(pageId) {
-            // 1. 모든 페이지 숨기고 타겟 페이지만 표시
-            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            
-            // 2. 헤더 타이틀 변경
-            document.getElementById('header-title').innerText = titles[pageId];
-
-            // 3. 네비게이션 활성화 스타일 변경
-            document.querySelectorAll('.nav-link').forEach(el => {
-                el.classList.remove('bg-applegreen-50', 'text-applegreen-700');
-                el.classList.add('text-slate-600', 'hover:bg-slate-50');
-            });
-            const activeNav = document.getElementById('nav-' + pageId);
-            if(activeNav) {
-                activeNav.classList.remove('text-slate-600', 'hover:bg-slate-50');
-                activeNav.classList.add('bg-applegreen-50', 'text-applegreen-700');
-            }
-
-            // 4. 페이지 전환 후 디스플레이 none으로 인해 캔버스 크기를 잃어버린 차트 복구
-            setTimeout(() => {
-                appCharts.forEach(chart => {
-                    chart.resize();
-                });
-            }, 50); // DOM이 그려질 약간의 시간을 부여
-
-            // 5. 모바일 사이드바 닫기
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar.classList.contains('-translate-x-full')) {
-                    toggleSidebar();
-                }
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                overlay.classList.add('hidden');
-            } else {
-                overlay.classList.remove('hidden');
-            }
-        }
-
-        // -------------------------------------------------------------
-        // 품종 필터링 및 동적 인사이트 교체
-        // -------------------------------------------------------------
-        const insightData = {
-            'all': `
-                <li><strong>전반적 시장:</strong> 연말까지 시장 내 사과 공급량이 점진적으로 증가하며 가격 하향 안정화가 예상됩니다.</li>
-                <li><strong>홍로:</strong> 명절 특수 종료 및 공급 물량 증가로 인해 당분간 지속적인 하락세가 예상됩니다.</li>
-                <li><strong>아리수:</strong> 시장 내 프리미엄 수요가 유지되며 향후 2주간 강보합세(45,000원~46,000원대)를 보일 전망입니다.</li>
-                <li><strong>썸머킹:</strong> 조생종 특성상 수확 시기가 지나 시장 거래가 종료되었으며, 재고 물량은 가공용으로 소진을 권장합니다.</li>
-            `,
-            'hongro': `
-                <li><strong>가격 하락 구간 진입:</strong> 명절 특수(9월)가 종료되면서 현재 도매가가 지속적으로 낮아지고 있습니다.</li>
-                <li><strong>AI 권고:</strong> 추가적인 가격 하락(15% 예상) 전에 보유 물량을 최대한 빨리 출하하거나, B2B 직거래를 통해 고정 가격을 확보하는 것이 유리합니다.</li>
-            `,
-            'arisu': `
-                <li><strong>프리미엄 가격 방어:</strong> 차별화된 맛과 외형으로 타 품종 대비 높은 가격대(45,000원 선)를 견고하게 유지하고 있습니다.</li>
-                <li><strong>AI 권고:</strong> 향후 2주 내외까지 강보합세가 예상되므로, 서둘러 덤핑하기보다는 상(上)등급 상품을 선별하여 수익을 극대화할 수 있는 <strong>최적의 출하 타이밍</strong>입니다.</li>
-            `,
-            'summerking': `
-                <li><strong>시즌 종료:</strong> 여름 사과 특성상 8월 말 이후 주력 시장에서의 거래가 사실상 마무리되었습니다.</li>
-                <li><strong>AI 권고:</strong> 현재 남아있는 잔여 물량이나 파지 등은 일반 도매 출하보다는 B2B 매칭을 활용한 로컬 가공 공장(사과즙 등) 납품을 권장합니다.</li>
-            `
-        };
-
-        const badgeLabels = {
-            'all': '전체 품종',
-            'hongro': '홍로 특화',
-            'arisu': '아리수 특화',
-            'summerking': '썸머킹 특화'
-        };
-
-        function filterVariety(variety, btnElement) {
-            // 버튼 스타일 갱신
-            const buttons = document.querySelectorAll('.variety-btn');
-            buttons.forEach(btn => {
-                btn.className = "variety-btn px-3 py-1 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 rounded text-sm font-medium transition-colors whitespace-nowrap";
-            });
-            btnElement.className = "variety-btn px-3 py-1 bg-slate-800 text-white rounded text-sm font-medium whitespace-nowrap";
-
-            // 1. 차트 데이터셋 필터링
-            if (fullPriceChartInstance) {
-                fullPriceChartInstance.data.datasets.forEach((dataset, index) => {
-                    if (variety === 'all') {
-                        dataset.hidden = false;
-                    } else if (variety === 'hongro') {
-                        dataset.hidden = !(index === 0 || index === 1);
-                    } else if (variety === 'arisu') {
-                        dataset.hidden = !(index === 2 || index === 3);
-                    } else if (variety === 'summerking') {
-                        dataset.hidden = !(index === 4);
-                    }
-                });
-                fullPriceChartInstance.update();
-            }
-
-            // 2. 하단 AI 인사이트 텍스트 동적 변경
-            const insightList = document.getElementById('insight-list');
-            const insightBadge = document.getElementById('insight-badge');
-            
-            insightBadge.innerText = badgeLabels[variety];
-            
-            // 부드러운 전환을 위한 페이드 인/아웃 효과
-            insightList.style.opacity = '0';
-            setTimeout(() => {
-                insightList.innerHTML = insightData[variety];
-                insightList.style.opacity = '1';
-            }, 150);
-        }
-
-        // 초기 구동
-        window.addEventListener('DOMContentLoaded', () => {
-            initCharts();
-            showPage('dashboard');
+    function updateChartsGridColor(color) {
+        charts.forEach(chart => {
+            if(chart.options.scales.x) chart.options.scales.x.grid.color = color;
+            if(chart.options.scales.y) chart.options.scales.y.grid.color = color;
+            chart.update();
         });
+    }
 
-    </script>
+    /* ==============================
+       Chart.js Configurations
+       ============================== */
+    Chart.defaults.color = '#7f8c8d';
+    Chart.defaults.font.family = "'Pretendard', -apple-system, sans-serif";
+    Chart.defaults.font.size = 13;
+
+    // 공통 툴팁 및 스케일 옵션 생성기
+    const getCommonOptions = () => ({
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, padding: 15 } },
+            tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', padding: 10 }
+        },
+        scales: {
+            x: { grid: { color: 'rgba(0,0,0,0.1)', drawBorder: false } },
+            y: { grid: { color: 'rgba(0,0,0,0.1)', drawBorder: false }, ticks: { stepSize: 10000 } }
+        }
+    });
+
+    // 1. 종합 대시보드 - 전체 가격 추이
+    const ctxMain = document.getElementById('mainPriceChart').getContext('2d');
+    const mainGrad = ctxMain.createLinearGradient(0, 0, 0, 300);
+    mainGrad.addColorStop(0, 'rgba(46, 204, 113, 0.4)'); mainGrad.addColorStop(1, 'rgba(46, 204, 113, 0.0)');
+    
+    charts.push(new Chart(ctxMain, {
+        type: 'line',
+        data: {
+            labels: ['7월 3주', '7월 4주', '8월 1주', '8월 2주(예측)', '8월 3주(예측)', '8월 4주(예측)'],
+            datasets: [
+                { label: '실제 도매가', data: [92000, 95000, 98000, null, null, null], borderColor: '#2ecc71', backgroundColor: mainGrad, fill: true, tension: 0.4 },
+                { label: 'AI 예측가', data: [null, null, 98000, 101000, 106000, 104500], borderColor: '#e74c3c', borderDash: [6,6], tension: 0.4 }
+            ]
+        },
+        options: getCommonOptions()
+    }));
+
+    // 2. 종합 대시보드 - 생산량 바 차트
+    const ctxProd = document.getElementById('productionChart').getContext('2d');
+    const prodGrad = ctxProd.createLinearGradient(0, 0, 0, 300);
+    prodGrad.addColorStop(0, 'rgba(52, 152, 219, 0.8)'); prodGrad.addColorStop(1, 'rgba(52, 152, 219, 0.2)');
+    
+    charts.push(new Chart(ctxProd, {
+        type: 'bar',
+        data: {
+            labels: ['2021', '2022', '2023', '2024', '2025(예측)'],
+            datasets: [{ label: '생산량(톤)', data: [52133, 58640, 36063, 42735, 44318], backgroundColor: prodGrad, borderRadius: 6 }]
+        },
+        options: { ...getCommonOptions(), plugins: { legend: { display: false } } }
+    }));
+
+    // 3. 홍로 전용 차트
+    const ctxHongro = document.getElementById('hongroChart').getContext('2d');
+    charts.push(new Chart(ctxHongro, {
+        type: 'line',
+        data: {
+            labels: ['8월 1주', '8월 2주', '8월 3주(최적)', '8월 4주', '9월 1주'],
+            datasets: [{ label: '홍로 AI 예측가', data: [85000, 92000, 106000, 94000, 89000], borderColor: '#ff4757', backgroundColor: 'rgba(255, 71, 87, 0.1)', fill: true, tension: 0.4, pointRadius: [3,3,8,3,3], pointBackgroundColor: '#ff4757' }]
+        },
+        options: getCommonOptions()
+    }));
+
+    // 4. 부사 전용 차트
+    const ctxFuji = document.getElementById('fujiChart').getContext('2d');
+    charts.push(new Chart(ctxFuji, {
+        type: 'line',
+        data: {
+            labels: ['10월 3주', '10월 4주', '11월 1주(최적)', '11월 2주(냉해위험)', '11월 3주'],
+            datasets: [{ label: '부사 AI 예측가', data: [81000, 86000, 92000, 75000, 72000], borderColor: '#f5af19', backgroundColor: 'rgba(245, 175, 25, 0.1)', fill: true, tension: 0.4, pointRadius: [3,3,8,4,4], pointBackgroundColor: '#f5af19' }]
+        },
+        options: getCommonOptions()
+    }));
+
+    // 5. 아오리 전용 차트
+    const ctxTsugaru = document.getElementById('tsugaruChart').getContext('2d');
+    charts.push(new Chart(ctxTsugaru, {
+        type: 'line',
+        data: {
+            labels: ['7월 2주', '7월 3주', '7월 4주(최적)', '8월 1주', '8월 2주'],
+            datasets: [{ label: '아오리 AI 예측가', data: [70000, 82000, 88000, 75000, 68000], borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.1)', fill: true, tension: 0.4, pointRadius: [3,3,8,3,3], pointBackgroundColor: '#2ed573' }]
+        },
+        options: getCommonOptions()
+    }));
+
+</script>
 </body>
 </html>
